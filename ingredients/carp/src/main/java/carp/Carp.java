@@ -1,5 +1,3 @@
 package carp;
 
-public class Carp {
-
-}
+public class Carp { }

@@ -1,5 +1,6 @@
 //file:noinspection CompileStatic
 dependencies {
+    api project(':dish')
     api project(':potato-salad')
     api project(':ham')
 

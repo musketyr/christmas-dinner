@@ -1,4 +1,3 @@
 package breadcrumbs;
 
-public class Breadcrumbs {
-}
+public class Breadcrumbs { }

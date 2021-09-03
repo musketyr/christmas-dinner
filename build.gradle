@@ -90,12 +90,13 @@ subprojects { sub ->
             String packageName = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_UNDERSCORE, sub.name)
             String className = CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, sub.name)
             sub.file("src/main/java/${packageName}").mkdirs()
-            sub.file("src/main/java/${packageName}/${className}.java").createNewFile()
-            sub.file("src/main/java/${packageName}/${className}.java").text == """
-        package $packageName;
+            if (sub.file("src/main/java/${packageName}/${className}.java").createNewFile()) {
+                sub.file("src/main/java/${packageName}/${className}.java").write """
+                package $packageName;
 
-        class ${className} { }
-        """.stripIndent()
+                public class ${className} { }
+                """.stripIndent().trim()
+            }
         }
     }
 
