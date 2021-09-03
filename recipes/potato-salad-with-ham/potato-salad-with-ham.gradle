@@ -2,13 +2,15 @@
 dependencies {
     api project(':potato-salad')
     api project(':ham')
-    api project(':onion')
-    api project(':pickles')
-    api project(':peppers')
-    api project(':mayo')
 
+    implementation project(':boiled-potatoes')
+    implementation project(':mayo')
+    implementation project(':onion')
+    implementation project(':pickles')
+    implementation project(':peppers')
     implementation project(':bowl')
     implementation project(':cutting-board')
+    implementation project(':vegetable-knife')
     implementation project(':potato-slicer')
 
     runtimeOnly project(':fork')

@@ -5,5 +5,6 @@ dependencies {
     implementation project(':potato-salad-with-ham')
     implementation project(':breaded-carp')
 
+    runtimeOnly project(':lemon')
     runtimeOnly project(':plate')
 }

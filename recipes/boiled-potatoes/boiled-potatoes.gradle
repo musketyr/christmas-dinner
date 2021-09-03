@@ -1,0 +1,7 @@
+dependencies {
+    api project(':potatoes')
+
+    implementation project(':pot')
+    implementation project(':water')
+    implementation project(':cooker')
+}

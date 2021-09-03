@@ -1,16 +1,17 @@
-plugins {
-    id 'org.kordamp.gradle.groovy-project'
-    id 'org.kordamp.gradle.checkstyle'
-    id 'org.kordamp.gradle.codenarc'
-    id 'org.kordamp.gradle.coveralls'
-    id 'io.github.gradle-nexus.publish-plugin'
+import com.google.common.base.CaseFormat
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+    }
 }
 
-if (!project.hasProperty('ossrhUsername'))      ext.ossrhUsername       = System.getenv('SONATYPE_USERNAME') ?: '**UNDEFINED**'
-if (!project.hasProperty('ossrhPassword'))      ext.ossrhPassword       = System.getenv('SONATYPE_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingKeyId'))       ext.signingKeyId        = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingPassword'))    ext.signingPassword     = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
-if (!project.hasProperty('signingSecretKey'))   ext.signingSecretKey    = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
+plugins {
+    id 'org.kordamp.gradle.java-project'
+}
 
 config {
     release = (rootProject.findProperty('release') ?: false).toBoolean()
@@ -44,47 +45,18 @@ config {
                 url  = '' + project.rootProject.buildDir + '/repos/local/snapshot'
             }
         }
-    }
 
-    licensing {
-        licenses {
-            license {
-                id = 'Apache-2.0'
+        docs {
+            javadoc {
+                enabled = false
             }
         }
     }
 
-    publishing {
-        signing {
-            enabled =  true
-            keyId = signingKeyId
-            secretKey = signingSecretKey
-            password = signingPassword
-        }
-
-        releasesRepository  = 'localRelease'
-        snapshotsRepository = 'localSnapshot'
+    licensing {
+        enabled = false
     }
 
-    quality {
-        checkstyle {
-            toolVersion = '8.27'
-        }
-
-        codenarc {
-            toolVersion = '1.5'
-        }
-    }
-
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            username = ossrhUsername
-            password = ossrhPassword
-        }
-    }
 }
 
 allprojects {
@@ -108,40 +80,23 @@ projects {
             repositories {
                 mavenCentral()
             }
-
-            // location independent tests (useful for stable CI builds)
-            tasks.withType(Test){
-                systemProperty 'user.timezone', 'UTC'
-                systemProperty 'user.language', 'en'
-            }
-
-            tasks.withType(JavaCompile) {
-                options.encoding = "UTF-8"
-                options.compilerArgs.add('-parameters')
-            }
-
-            tasks.withType(GroovyCompile) {
-                groovyOptions.forkOptions.jvmArgs.add('-Dgroovy.parameters=true')
-            }
-
-            dependencies {
-                api platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                compile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                implementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                compileOnly platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                testCompile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                testImplementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-            }
-
-            // useful for IntelliJ
-            task cleanOut(type: Delete) {
-                delete file('out')
-            }
-
-            clean.dependsOn cleanOut
         }
     }
 }
 
+subprojects { sub ->
+    task createContent {
+        doLast {
+            String packageName = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_UNDERSCORE, sub.name)
+            String className = CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, sub.name)
+            sub.file("src/main/java/${packageName}").mkdirs()
+            sub.file("src/main/java/${packageName}/${className}.java").createNewFile()
+            sub.file("src/main/java/${packageName}/${className}.java").text == """
+        package $packageName;
 
-check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')
+        class ${className} { }
+        """.stripIndent()
+        }
+    }
+
+}
