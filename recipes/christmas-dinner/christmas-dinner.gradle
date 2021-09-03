@@ -1,0 +1,9 @@
+dependencies {
+    api project(':potato-salad')
+    api project(':breaded-dish')
+
+    implementation project(':potato-salad-with-ham')
+    implementation project(':breaded-carp')
+
+    runtimeOnly project(':plate')
+}

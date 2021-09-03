@@ -1,0 +1,8 @@
+dependencies {
+    api project(':eggs')
+    api project(':flour')
+    api project(':breadcrumbs')
+
+    implementation project(':plate')
+    implementation project(':fork')
+}

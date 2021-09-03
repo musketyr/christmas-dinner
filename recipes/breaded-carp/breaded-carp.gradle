@@ -1,0 +1,11 @@
+dependencies {
+    api project(':breaded-dish')
+    api project(':carp')
+
+    implementation project(':oil')
+    implementation project(':pan')
+    implementation project(':filleting-knife')
+
+    runtimeOnly project(':knife')
+    runtimeOnly project(':fork')
+}

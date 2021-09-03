@@ -1,0 +1,15 @@
+//file:noinspection CompileStatic
+dependencies {
+    api project(':potato-salad')
+    api project(':ham')
+    api project(':onion')
+    api project(':pickles')
+    api project(':peppers')
+    api project(':mayo')
+
+    implementation project(':bowl')
+    implementation project(':cutting-board')
+    implementation project(':potato-slicer')
+
+    runtimeOnly project(':fork')
+}

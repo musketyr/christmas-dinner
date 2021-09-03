@@ -1,0 +1,147 @@
+plugins {
+    id 'org.kordamp.gradle.groovy-project'
+    id 'org.kordamp.gradle.checkstyle'
+    id 'org.kordamp.gradle.codenarc'
+    id 'org.kordamp.gradle.coveralls'
+    id 'io.github.gradle-nexus.publish-plugin'
+}
+
+if (!project.hasProperty('ossrhUsername'))      ext.ossrhUsername       = System.getenv('SONATYPE_USERNAME') ?: '**UNDEFINED**'
+if (!project.hasProperty('ossrhPassword'))      ext.ossrhPassword       = System.getenv('SONATYPE_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingKeyId'))       ext.signingKeyId        = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingPassword'))    ext.signingPassword     = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingSecretKey'))   ext.signingSecretKey    = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
+
+config {
+    release = (rootProject.findProperty('release') ?: false).toBoolean()
+
+    info {
+        name        = 'Christmas Dinner'
+        vendor      = 'Vladimir Orany'
+        description = 'Gradle Configurations Showcase'
+
+        links {
+            website      = 'https://github.com/' + slug
+            issueTracker = 'https://github.com/' + slug + '/issues'
+            scm          = 'https://github.com/' + slug + '.git'
+        }
+
+        people {
+            person {
+                id    = 'musketyr'
+                name  = 'Vladimir Orany'
+                roles = ['developer']
+            }
+        }
+
+        repositories {
+            repository {
+                name = 'localRelease'
+                url  = '' + project.rootProject.buildDir + '/repos/local/release'
+            }
+            repository {
+                name = 'localSnapshot'
+                url  = '' + project.rootProject.buildDir + '/repos/local/snapshot'
+            }
+        }
+    }
+
+    licensing {
+        licenses {
+            license {
+                id = 'Apache-2.0'
+            }
+        }
+    }
+
+    publishing {
+        signing {
+            enabled =  true
+            keyId = signingKeyId
+            secretKey = signingSecretKey
+            password = signingPassword
+        }
+
+        releasesRepository  = 'localRelease'
+        snapshotsRepository = 'localSnapshot'
+    }
+
+    quality {
+        checkstyle {
+            toolVersion = '8.27'
+        }
+
+        codenarc {
+            toolVersion = '1.5'
+        }
+    }
+
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/release"  }
+    }
+
+    license {
+        exclude '**/*.json'
+        exclude '***.yml'
+    }
+}
+
+projects {
+    subprojects {
+        dirs(['dishes', 'ingredients', 'utensils', 'recipes']) { Project subproject ->
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
+
+            repositories {
+                mavenCentral()
+            }
+
+            // location independent tests (useful for stable CI builds)
+            tasks.withType(Test){
+                systemProperty 'user.timezone', 'UTC'
+                systemProperty 'user.language', 'en'
+            }
+
+            tasks.withType(JavaCompile) {
+                options.encoding = "UTF-8"
+                options.compilerArgs.add('-parameters')
+            }
+
+            tasks.withType(GroovyCompile) {
+                groovyOptions.forkOptions.jvmArgs.add('-Dgroovy.parameters=true')
+            }
+
+            dependencies {
+                api platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                compile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                implementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                compileOnly platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                testCompile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                testImplementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+            }
+
+            // useful for IntelliJ
+            task cleanOut(type: Delete) {
+                delete file('out')
+            }
+
+            clean.dependsOn cleanOut
+        }
+    }
+}
+
+
+check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')

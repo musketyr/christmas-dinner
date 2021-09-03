@@ -1,0 +1,4 @@
+//file:noinspection CompileStatic
+dependencies {
+    api project(':potatoes')
+}
