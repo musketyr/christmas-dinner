@@ -1,6 +1,10 @@
+plugins {
+    id 'application'
+}
+
 dependencies {
     api project(':dish')
-    api project(':tableware')
+    api project(':cutlery')
     api project(':potato-salad')
     api project(':breaded-dish')
 
@@ -9,3 +13,5 @@ dependencies {
 
     runtimeOnly project(':plate')
 }
+
+mainClassName = 'christmas_dinner.ChristmasDinner'

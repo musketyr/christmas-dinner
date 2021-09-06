@@ -1,13 +1,11 @@
 package tableware;
 
+import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
+
 public class TablewareContainer {
 
     public static Tableware currentTableware() {
-        return new Tableware() {
-            @Override
-            public void add(Object toBeServed) {
-                // do nothing
-            }
-        };
+        return StreamSupport.stream(ServiceLoader.load(Tableware.class).spliterator(), false).findFirst().orElse(new Tableware() { });
     }
 }

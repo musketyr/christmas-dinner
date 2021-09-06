@@ -1,3 +1,10 @@
 package fork;
 
-public class Fork { }
+import cutlery.Cutlery;
+
+public class Fork implements Cutlery {
+    @Override
+    public String toString() {
+        return "fork";
+    }
+}
